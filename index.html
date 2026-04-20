@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Personal Finance AI Agent</title>
+    <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+
+<body class="dark-theme">
+    <!-- Cinematic Elements -->
+    <div id="particles-container"></div>
+
+    <div class="background-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+    </div>
+
+    <!-- LOGIN PAGE -->
+    <div id="login-view" class="view-container active">
+        <div class="login-box glass-card premium-border">
+            <div class="logo-center">
+                <div class="logo-icon-wrapper pulse-animation">
+                    <i class="fa-solid fa-robot"></i>
+                </div>
+                <h1>SmartFinance <span class="ai-badge">AI</span></h1>
+            </div>
+            <h2 class="mt-4" style="text-align: center; font-size: 1.5rem;">Welcome Back</h2>
+            <p style="text-align: center; opacity: 0.7; margin-bottom: 2rem;">Log in to access your financial agent.</p>
+
+            <form id="login-form">
+                <div class="form-group">
+                    <label>Username</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" id="login-username" placeholder="Enter your name" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="login-password" placeholder="••••••••" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary w-100 btn-glow mt-3">
+                    <i class="fa-solid fa-right-to-bracket"></i> Login Securely
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN APP LAYOUT -->
+    <div id="app-view" class="view-container hidden layout-wrapper">
+
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="sidebar glass-card">
+            <div class="sidebar-header">
+                <div class="logo-icon-wrapper">
+                    <i class="fa-solid fa-robot"></i>
+                </div>
+                <h1 style="font-size: 1.2rem;">SmartFinance</h1>
+            </div>
+
+            <nav class="sidebar-nav">
+                <button class="nav-btn active" data-target="dashboard">
+                    <i class="fa-solid fa-chart-pie"></i> Dashboard
+                </button>
+                <button class="nav-btn" data-target="transactions">
+                    <i class="fa-solid fa-list-check"></i> Transactions
+                </button>
+                <button class="nav-btn" data-target="budget">
+                    <i class="fa-solid fa-vault"></i> Budget
+                </button>
+
+                <button class="nav-btn" data-target="notifications">
+                    <i class="fa-solid fa-bell"></i> Notifications
+                </button>
+                <button class="nav-btn" data-target="ai">
+                    <i class="fa-solid fa-brain"></i> AI Agent
+                </button>
+                <button class="nav-btn" data-target="profile">
+                    <i class="fa-solid fa-user-circle"></i> Profile
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button id="theme-toggle" class="btn-icon w-100" style="border-radius: 12px; margin-bottom: 1rem;">
+                    <i class="fa-solid fa-sun"></i> <span>Toggle Theme</span>
+                </button>
+                <button id="logout-btn" class="nav-btn text-danger">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="main-content">
+
+            <!-- PAGE: DASHBOARD -->
+            <div id="page-dashboard" class="page active">
+                <header class="page-header">
+                    <h2><i class="fa-solid fa-hand-wave"></i> Hello, <span id="user-greeting">User</span>!</h2>
+                    <p class="subtitle">Here's your financial overview.</p>
+                </header>
+
+                <section class="cinematic-grid">
+                    <!-- Top Row: Analytics & Quick Stats -->
+                    <div class="glass-card col-span-8" style="padding: 1.5rem;">
+                        <h2 style="font-size: 1.2rem; margin-bottom: 1rem;">Financial summary <span
+                                style="font-size: 0.8rem; font-weight: normal; opacity: 0.7;">Track your
+                                activities</span></h2>
+                        <div id="chart-parent" style="height: 350px; width: 100%; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.02); border-radius: 16px; position: relative;">
+                            <!-- Dynamic SVG Chart Rendered Here -->
+                            <div style="text-align: center; opacity: 0.5;">
+                                <i class="fa-solid fa-chart-pie" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                                <div>Analyzing your finances...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-span-4 dashboard-stats-column"
+                        style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; min-height: 500px;">
+                        <div class="premium-card" style="padding: 1.2rem; margin-bottom: 0;">
+                            <div class="stat-content">
+                                <h3>Total Budget <span id="budget-period-display"
+                                        style="font-size: 0.8rem; font-weight: normal; opacity: 0.7;">(Monthly)</span>
+                                </h3>
+                                <p id="total-budget-display" style="font-size: 2rem; color: #fff;">₹0</p>
+                            </div>
+                        </div>
+                        <div class="premium-card budget-card" style="padding: 1.2rem; margin-bottom: 0;">
+                            <div class="stat-content">
+                                <h3>Total Spent</h3>
+                                <p id="total-spent-display" style="font-size: 2rem; color: var(--primary);">₹0</p>
+                            </div>
+                        </div>
+                        <div class="premium-card remaining-card" id="balance-card"
+                            style="padding: 1.2rem; margin-bottom: 0;">
+                            <div class="stat-content">
+                                <h3>Remaining Balance</h3>
+                                <p id="remaining-balance-display" style="font-size: 2rem;">₹0</p>
+                                <span id="balance-status-text" class="status-text" style="font-size: 0.85rem;">Good
+                                    Standing</span>
+                            </div>
+                        </div>
+
+                        <div class="glass-card" style="padding: 1.2rem; flex-grow: 1; border: 1px dashed var(--secondary);">
+                            <div class="stat-content">
+                                <h3 style="color: var(--secondary);"><i class="fa-solid fa-brain"></i> Memory Recall</h3>
+                                <div id="memory-stat-summary" style="margin-top: 0.5rem;">
+                                    <div style="font-size: 1.5rem; font-weight: 800;" id="memory-recall-percent">0%</div>
+                                    <div style="font-size: 0.8rem; opacity: 0.7;">Profile Completion</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Row: Accounts, Quick Add, Savings -->
+
+                    <div class="glass-card col-span-12" style="padding: 1.5rem;">
+                        <h2 style="font-size: 1.2rem; margin-bottom: 1rem;"><i
+                                class="fa-solid fa-bolt text-primary"></i> Quick Add Expense</h2>
+                        <form id="expense-form">
+                            <div class="form-row">
+                                <div class="form-group flex-2">
+                                    <label>Description</label>
+                                    <div class="input-with-icon">
+                                        <i class="fa-solid fa-tag"></i>
+                                        <input type="text" id="expense-name" placeholder="e.g. Starbucks" required>
+                                    </div>
+                                </div>
+                                <div class="form-group flex-1">
+                                    <label>Amount (₹)</label>
+                                    <div class="input-with-icon">
+                                        <i class="fa-solid fa-indian-rupee-sign"></i>
+                                        <input type="number" id="expense-amount" placeholder="0.00" min="0.01"
+                                            step="0.01" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row mt-3">
+                                <div class="form-group flex-1">
+                                    <label>Category <span class="ai-hint">AI Auto-detects</span></label>
+                                    <div class="input-with-icon">
+                                        <i class="fa-solid fa-layer-group"></i>
+                                        <select id="expense-category">
+                                            <option value="">✨ Let AI Decide ✨</option>
+                                            <option value="Food">🍔 Food & Dining</option>
+                                            <option value="Travel">🚗 Travel</option>
+                                            <option value="Shopping">🛍️ Shopping</option>
+                                            <option value="Bills">🧾 Bills & Utilities</option>
+                                            <option value="Health">⚕️ Health</option>
+                                            <option value="Entertainment">🍿 Entertainment</option>
+                                            <option value="Other">📦 Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group flex-1">
+                                    <label>Date</label>
+                                    <div class="input-with-icon">
+                                        <i class="fa-regular fa-calendar"></i>
+                                        <input type="date" id="expense-date" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn-primary w-100 btn-glow mt-4">Add Transaction</button>
+                        </form>
+                    </div>
+                </section>
+            </div>
+
+
+
+            <!-- PAGE: NOTIFICATIONS -->
+            <div id="page-notifications" class="page hidden">
+                <header class="page-header">
+                    <h2><i class="fa-solid fa-bell"></i> Notifications & Insights</h2>
+                    <p class="subtitle">AI-driven wallet updates and alerts.</p>
+                </header>
+
+                <div class="glass-card mt-4" style="padding: 1.5rem; max-width: 800px; margin: 1rem auto;">
+                    <div id="notifications-list" style="display: flex; flex-direction: column; gap: 1rem;">
+                        <!-- Dynamic notifications -->
+                        <div style="text-align: center; opacity: 0.5; padding: 2rem;">No new notifications.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE: BUDGET -->
+            <div id="page-budget" class="page hidden">
+                <header class="page-header">
+                    <h2><i class="fa-solid fa-bullseye"></i> Financial Goal & Budget</h2>
+                    <p class="subtitle">Set your spending limits to let AI analyze your habits.</p>
+                </header>
+
+                <section class="glass-card mt-4" style="max-width: 600px; margin: 0 auto;">
+                    <div class="logo-center mb-4">
+                        <div class="logo-icon-wrapper" style="width: 80px; height: 80px; font-size: 3rem;">
+                            <i class="fa-solid fa-vault"></i>
+                        </div>
+                    </div>
+                    <form id="budget-form">
+                        <div class="form-group">
+                            <label>Budget Period</label>
+                            <div class="input-with-icon">
+                                <i class="fa-solid fa-calendar-days"></i>
+                                <select id="budget-period">
+                                    <option value="Monthly">Monthly</option>
+                                    <option value="Yearly">Yearly</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group mt-4">
+                            <label>Budget Amount (₹)</label>
+                            <div class="input-with-icon large-input">
+                                <i class="fa-solid fa-indian-rupee-sign"></i>
+                                <input type="number" id="budget-input" placeholder="e.g. 50000" min="1" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary w-100 btn-glow mt-4">
+                            <i class="fa-solid fa-check"></i> Save Budget
+                        </button>
+                    </form>
+                </section>
+            </div>
+
+            <!-- PAGE: AI AGENT -->
+            <div id="page-ai" class="page hidden">
+                <header class="page-header">
+                    <h2><i class="fa-solid fa-brain"></i> AI Agent Hub</h2>
+                    <p class="subtitle">Automated insights, alerts, and conversational financial assistance.</p>
+                </header>
+
+                <div class="main-grid mt-4">
+                    <!-- AI Insights -->
+                    <section class="glass-card ai-insights-card neon-border left-col">
+                        <div class="ai-header">
+                            <div class="ai-avatar">
+                                <i class="fa-solid fa-robot" style="font-size: 1.5rem; color: white;"></i>
+                            </div>
+                            <h2>Proactive Analysis</h2>
+                        </div>
+                        <div id="ai-alerts-container" class="insights-container mt-3" style="max-height: 400px;">
+                            <div class="insight-item empty-state">Provide some expenses for me to analyze!</div>
+                        </div>
+
+                        <div class="memory-stats-box mt-4" style="background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 16px; border: 1px solid rgba(184, 84, 245, 0.2);">
+                            <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--secondary);"><i class="fa-solid fa-microchip"></i> Memory Statistics</h3>
+                            <div class="stats-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div class="stat-mini-card">
+                                    <div style="font-size: 0.8rem; opacity: 0.7;">Context Hits</div>
+                                    <div style="font-size: 1.2rem; font-weight: 700;" id="memory-hits">0</div>
+                                </div>
+                                <div class="stat-mini-card">
+                                    <div style="font-size: 0.8rem; opacity: 0.7;">Known Patterns</div>
+                                    <div style="font-size: 1.2rem; font-weight: 700;" id="memory-patterns">0</div>
+                                </div>
+                                <div class="stat-mini-card">
+                                    <div style="font-size: 0.8rem; opacity: 0.7;">Base Chunks</div>
+                                    <div style="font-size: 1.2rem; font-weight: 700;">1,240</div>
+                                </div>
+                                <div class="stat-mini-card">
+                                    <div style="font-size: 0.8rem; opacity: 0.7;">Learning Rate</div>
+                                    <div style="font-size: 1.2rem; font-weight: 700;">High</div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- AI Chat Assistant -->
+                    <section class="glass-card ai-chat-section right-col">
+                        <h2><i class="fa-solid fa-message text-warning"></i> Ask Agent</h2>
+
+                        <div class="chat-window" id="chat-window" style="height: 350px;">
+                            <div class="chat-message ai-message">
+                                <div class="message-avatar"><i class="fa-solid fa-robot"></i></div>
+                                <div class="message-bubble">Hey! You can talk to me naturally. Try:<br>• <em>"spent 450
+                                        on Dominos"</em> → I'll log it instantly ✅<br>• <em>"How much on Food this
+                                        month?"</em><br>• <em>"Can I afford a ₹3000 jacket?"</em></div>
+                            </div>
+                        </div>
+
+                        <form id="chat-form" class="chat-input-area mt-3">
+                            <div class="input-with-icon advanced-input w-100">
+                                <input type="text" id="chat-input"
+                                    placeholder="e.g. spent 200 on Uber, or ask a question..." required
+                                    autocomplete="off">
+                                <button type="submit" class="btn-primary"
+                                    style="padding: 0.8rem 1.2rem; border-radius: 8px;">
+                                    <i class="fa-solid fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </section>
+                </div>
+            </div>
+
+            <!-- PAGE: TRANSACTIONS -->
+            <div id="page-transactions" class="page hidden">
+                <header class="page-header"
+                    style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <h2><i class="fa-solid fa-list-check"></i> Transaction History</h2>
+                        <p class="subtitle">View all your expenses and generate reports.</p>
+                    </div>
+                    <button id="export-pdf-btn" class="btn-primary btn-glow">
+                        <i class="fa-solid fa-file-pdf"></i> Export to PDF
+                    </button>
+                </header>
+
+                <section class="glass-card mt-4">
+                    <div id="pdf-content">
+                        <div class="pdf-header hidden" id="pdf-header">
+                            <h1>Financial Report</h1>
+                            <p id="pdf-date"></p>
+                        </div>
+                        <div class="transactions-list full-list" id="full-transactions-list" style="max-height: none;">
+                            <!-- Full Transactions injected here -->
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- PAGE: PROFILE -->
+            <div id="page-profile" class="page hidden">
+                <header class="page-header">
+                    <h2><i class="fa-solid fa-user-circle"></i> User Profile</h2>
+                    <p class="subtitle">Manage your account details.</p>
+                </header>
+
+                <section class="glass-card mt-4" style="max-width: 600px; margin: 0 auto; text-align: center;">
+                    <div class="profile-avatar mb-4"
+                        style="width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; font-size: 4rem; color: white; margin: 0 auto; box-shadow: var(--glow-primary);">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <h2 id="profile-name" style="justify-content: center; font-size: 2rem;">User</h2>
+                    <p class="subtitle">Active Member</p>
+
+                    <div class="profile-details mt-4"
+                        style="text-align: left; background: rgba(0,0,0,0.1); padding: 1.5rem; border-radius: 12px;">
+                        <div
+                            style="margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem;">
+                            <strong>Data Status:</strong> <span style="float:right; color: var(--success);">Synced
+                                Locally</span>
+                        </div>
+                        <div
+                            style="margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem;">
+                            <strong>Total Transactions:</strong> <span id="profile-tx-count"
+                                style="float:right;">0</span>
+                        </div>
+                        <div>
+                            <strong>Account Created:</strong> <span id="profile-join-date"
+                                style="float:right;">Today</span>
+                        </div>
+
+                    </div>
+
+                    <div class="agent-memory-box mt-4"
+                        style="text-align: left; background: rgba(79, 70, 229, 0.1); border: 1px solid var(--primary); padding: 1.5rem; border-radius: 12px; position: relative;">
+                        <span class="ai-badge" style="position: absolute; top: -10px; right: 20px;">AI Brain</span>
+                        <h3 style="font-size: 1.1rem; margin-bottom: 1rem;"><i class="fa-solid fa-brain"></i> Agent
+                            Financial Profile</h3>
+                        <div id="ai-user-profile" style="font-size: 0.9rem; line-height: 1.6;">
+                            <em>The Agent is currently gathering data...</em>
+                        </div>
+                    </div>
+
+                    <button id="profile-logout-btn" class="btn-primary w-100 mt-4"
+                        style="background: linear-gradient(135deg, var(--danger), #be123c); box-shadow: 0 0 20px rgba(239,68,68,0.4);">
+                        <i class="fa-solid fa-power-off"></i> Sign Out
+                    </button>
+                </section>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

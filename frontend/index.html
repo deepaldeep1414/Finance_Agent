@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Personal Finance AI Agent</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <h2>SmartFinance AI</h2>
+            <nav>
+                <ul>
+                    <li class="active" data-tab="dashboard">Dashboard</li>
+                    <li data-tab="add-expense">Add Expense</li>
+                    <li data-tab="budget">Budget Settings</li>
+                    <li data-tab="ai-insights">AI Insights</li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard -->
+            <section id="dashboard" class="tab-content active">
+                <header>
+                    <h1>Dashboard</h1>
+                </header>
+                <div class="cards-container">
+                    <div class="card glass-card">
+                        <h3>Total Spent</h3>
+                        <p id="total-spent-display">$0.00</p>
+                    </div>
+                    <div class="card glass-card">
+                        <h3>Remaining Budget</h3>
+                        <p id="remaining-budget-display">$0.00</p>
+                    </div>
+                </div>
+                <div class="charts-section glass-card">
+                    <h3>Spending Categories</h3>
+                    <canvas id="categoryChart"></canvas>
+                </div>
+                <div class="transactions-list glass-card">
+                    <h3>Recent Transactions</h3>
+                    <ul id="tx-list"></ul>
+                </div>
+            </section>
+
+            <!-- Add Expense -->
+            <section id="add-expense" class="tab-content">
+                <header>
+                    <h1>Add Expense</h1>
+                </header>
+                <div class="form-container glass-card">
+                    <form id="expense-form">
+                        <input type="text" id="exp-title" placeholder="What did you buy?" required>
+                        <input type="number" id="exp-amount" placeholder="Amount ($)" step="0.01" required>
+                        <select id="exp-category" required>
+                            <option value="food">Food</option>
+                            <option value="travel">Travel</option>
+                            <option value="shopping">Shopping</option>
+                            <option value="bills">Bills</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <input type="date" id="exp-date" required>
+                        <button type="submit" class="btn primary-btn">Add Expense</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Budget Settings -->
+            <section id="budget" class="tab-content">
+                <header>
+                    <h1>Budget Settings</h1>
+                </header>
+                <div class="form-container glass-card">
+                    <form id="budget-form">
+                        <input type="number" id="bud-total" placeholder="Total Budget ($)" step="0.01" required>
+                        <select id="bud-period">
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                        </select>
+                        <button type="submit" class="btn primary-btn">Set Budget</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- AI Insights Panel -->
+            <section id="ai-insights" class="tab-content">
+                <header>
+                    <h1>AI Financial Advisor</h1>
+                </header>
+                <div class="ai-panel">
+                    <div class="glass-card mb-4">
+                        <h3>"Can I afford this?"</h3>
+                        <div class="afford-calc">
+                            <input type="number" id="ai-price" placeholder="Item Price ($)" step="0.01">
+                            <button id="ask-ai-btn" class="btn ai-btn">Ask AI</button>
+                        </div>
+                        <div id="ai-response" class="response-box"></div>
+                    </div>
+                    
+                    <div class="glass-card">
+                        <h3>Smart Analysis</h3>
+                        <button id="analyze-btn" class="btn ai-btn mb-2">Analyze Spending</button>
+                        <div id="analysis-response" class="response-box"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
