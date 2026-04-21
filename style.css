@@ -271,6 +271,18 @@ body:not(.dark-theme) h1 {
     padding: 2rem 1.5rem;
     position: sticky;
     top: 1.5rem;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: left;
+    z-index: 100;
+}
+
+.sidebar.collapsed {
+    width: 0;
+    padding: 2rem 0;
+    margin-left: -1.5rem;
+    opacity: 0;
+    pointer-events: none;
+    overflow: hidden;
 }
 
 .sidebar-header {
@@ -332,12 +344,57 @@ body.dark-theme .nav-btn.active {
     padding-top: 1rem;
 }
 
-/* MAIN CONTENT PAGES */
+.sidebar-toggle-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-color-dark);
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-left: auto;
+}
+
+.sidebar-toggle-btn:hover {
+    background: var(--primary);
+    color: #000;
+}
+
+.sidebar-open-btn {
+    position: absolute;
+    top: 1.5rem;
+    left: 0rem;
+    width: 45px;
+    height: 45px;
+    background: var(--secondary);
+    color: white;
+    border: none;
+    border-radius: 0 12px 12px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 101;
+    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s;
+}
+
+.sidebar-open-btn:hover {
+    padding-left: 10px;
+    width: 55px;
+}
+
 .main-content {
     flex-grow: 1;
     height: calc(100vh - 3rem);
     overflow-y: auto;
     padding-right: 1rem;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
 }
 
 .main-content::-webkit-scrollbar {
@@ -360,6 +417,13 @@ body.dark-theme .nav-btn.active {
 
 .page-header {
     margin-bottom: 2rem;
+    padding-left: 1rem;
+    transition: padding 0.3s ease;
+}
+
+/* Give space for the sidebar open button when sidebar is collapsed */
+.sidebar.collapsed + .main-content .page-header {
+    padding-left: 4.5rem;
 }
 
 h2 {
