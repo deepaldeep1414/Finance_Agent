@@ -1134,31 +1134,7 @@ const Handlers = {
             }
             UI.addChatMessage(response + confidenceHtml);
         } else {
-            // Call backend for advanced AI reasoning (Grandmaster Level)
-            try {
-                const response = await fetch('/api/ai-decision', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ query: input, expenses: AppState.expenses, budget: AppState.budget, price: 0 })
-                });
-                const data = await response.json();
-                
-                if (data.reason) {
-                    const aiConfidence = data.confidence || 0.8;
-                    const aiConfidenceHtml = `<div style="font-size: 0.7rem; opacity: 0.6; margin-top: 0.3rem;">
-                        <i class="fa-solid fa-circle-check" style="color: #2ecc71;"></i> AI Accuracy: ${(aiConfidence * 100).toFixed(0)}%
-                    </div>`;
-                    
-                    // Simple Markdown bold to HTML bold
-                    const formattedReason = data.reason.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-                    UI.addChatMessage(formattedReason + aiConfidenceHtml);
-                } else {
-                    UI.addChatMessage("I am processing your request, but I encountered a slight hiccup in my reasoning engine. Please try again!");
-                }
-            } catch (e) {
-                console.error("AI Backend Error:", e);
-                UI.addChatMessage(result.message || "I'm having trouble connecting to my brain. Please check your internet connection!");
-            }
+            UI.addChatMessage(result.message || "I'm not sure about that. Try 'spent 450 on Dominos' or 'How much on Food?'");
         }
     },
 
@@ -1167,6 +1143,26 @@ const Handlers = {
         AppState.darkTheme = document.body.classList.contains('dark-theme');
         Storage.save();
         Charts.updateTheme();
+    },
+
+    toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const openBtn = document.getElementById('sidebar-open-btn');
+        if (sidebar && openBtn) {
+            sidebar.classList.add('collapsed');
+            openBtn.classList.remove('hidden');
+            AudioSys.success();
+        }
+    },
+
+    openSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const openBtn = document.getElementById('sidebar-open-btn');
+        if (sidebar && openBtn) {
+            sidebar.classList.remove('collapsed');
+            openBtn.classList.add('hidden');
+            AudioSys.success();
+        }
     },
 
     toggleAudio() {
@@ -1273,6 +1269,8 @@ function init() {
     Elements.btnCreateGoal()?.addEventListener('click', () => Handlers.createGoal());
     Elements.chatForm()?.addEventListener('submit', (e) => Handlers.handleChat(e));
     Elements.themeToggle()?.addEventListener('click', () => Handlers.toggleTheme());
+    document.getElementById('sidebar-collapse-btn')?.addEventListener('click', () => Handlers.toggleSidebar());
+    document.getElementById('sidebar-open-btn')?.addEventListener('click', () => Handlers.openSidebar());
     Elements.audioToggleBtn()?.addEventListener('change', () => Handlers.toggleAudio());
     Elements.audioLimitBtn()?.addEventListener('change', () => Handlers.toggleAudioLimit());
     Elements.exportPdfBtn()?.addEventListener('click', () => Handlers.exportPDF());

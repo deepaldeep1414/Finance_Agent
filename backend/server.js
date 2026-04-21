@@ -12,9 +12,6 @@ app.use(express.json());
 let expenses = [];
 let budget = { total: 0, used: 0, period: 'monthly' };
 
-// Serve static files from the root directory
-app.use(express.static(path.join(__dirname, '../')));
-
 app.post('/api/add-expense', (req, res) => {
     const { amount, category, date, title } = req.body;
     const newExpense = { id: Date.now(), amount, category, date, title };
@@ -45,10 +42,7 @@ app.post('/api/ai-decision', (req, res) => {
 });
 
 function runPythonAgent(action, payload, res) {
-    // Use 'python3' for production (Render/Linux)
-    const pythonCmd = process.env.NODE_ENV === 'production' ? 'python3' : 'python';
-    
-    const pythonProcess = spawn(pythonCmd, [
+    const pythonProcess = spawn('python', [
         path.join(__dirname, '../agent_v2/agent.py'),
         action,
         JSON.stringify(payload)
@@ -82,11 +76,6 @@ function runPythonAgent(action, payload, res) {
         }
     });
 }
-
-// Redirect all other requests to index.html (SPA support)
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../index.html'));
-});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
