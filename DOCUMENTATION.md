@@ -1,77 +1,69 @@
-# 📚 Technical Documentation: Smart Finance AI Agent
+# Finance Copilot — Technical Documentation
 
-This document provides a deep-dive into the architecture, logic, and design systems powering the **Grandmaster Finance AI Agent**.
+## System overview
 
----
+Finance Copilot is a personal-finance assistant built around three layered concerns:
 
-## 1. System Architecture
-The project follows a **Modular Full-Stack Architecture**, separating the presentation layer from the agentic reasoning engine.
+1. **Intent classification** — semantic similarity over a small set of canonical prototypes.
+2. **Financial analysis** — deterministic computation of metrics from logged transactions, budget, and stored profile.
+3. **Insight generation and rendering** — a structured `AssistantResponse` is produced per request and rendered through a single template that enforces tone and removes banned phrasing.
 
-### 🏗️ High-Level Component Map
-- **Frontend (UI Layer)**: Vanilla JS, CSS3, HTML5. Handles state persistence and real-time visualization.
-- **API Bridge (Express)**: A Node.js middleware that facilitates communication between the browser and the Python environment.
-- **Agentic Core (LangGraph)**: A stateful directed acyclic graph (DAG) that manages the AI's "thought process."
+The frontend is a self-sufficient static SPA. The backend (FastAPI) is optional: when a `GROQ_API_KEY` is configured it produces structured LLM responses that satisfy the same schema; otherwise it returns the same deterministic answer the frontend would produce locally.
 
----
+## Response schema
 
-## 2. The 7-Phase Agentic Workflow
-The AI's reasoning is built on a 7-phase architecture designed for accuracy and safety.
+| Field | Type | Description |
+| --- | --- | --- |
+| `intent` | enum | One of the 14 supported intents. |
+| `summary` | string | Single-sentence headline, ≤ 3 sentences. |
+| `key_insight` | string | The grounded observation behind the summary. |
+| `financial_impact` | string | Numerical impact line (uses ₹). |
+| `recommendation` | string | Concrete next action. |
+| `risk_level` | `low` \| `medium` \| `high` | Derived from variance, discretionary ratio, savings rate. |
+| `confidence` | number | 0–1 model-or-rule confidence. |
+| `metrics_used` | array | Names of the metrics referenced in the answer. |
+| `follow_up_question` | string | A single clarifying question for continuity. |
 
-1.  **Intent Classification**: Fast routing to determine if the query is a Transaction, an Advisory Request, or a Strategic Question.
-2.  **Deterministic Tool-Use**: Financial math is offloaded to Python functions (`tools.py`) to prevent LLM hallucinations.
-3.  **Retrieval-Augmented Generation (RAG)**: Expert data is pulled from `rag.py` to ground the AI in verified financial principles.
-4.  **Contextual Memory**: The agent tracks the current session and previous interactions via `memory.py`.
-5.  **Stateful Reasoning**: The LangGraph engine (`graph.py`) maintains the conversation state across multiple turns.
-6.  **Self-Reflection & Scoring**: A verification node that assigns an accuracy score (80-95%) to each response.
-7.  **Fiduciary Guardrails**: Final filtering to ensure advice adheres to safety standards (e.g., risk warnings for crypto).
+## Supported intents
 
----
+`spending_analysis`, `budgeting`, `subscriptions`, `savings`, `investing`, `debt`, `emotional_spending`, `lifestyle_tradeoff`, `financial_planning`, `purchase_decision`, `income_analysis`, `cashflow_analysis`, `recurring_expenses`, `general_finance_question`.
 
-## 3. Frontend Systems
+## Intent classification
 
-### 🎨 Design System: Glassmorphism 2.0
-The UI uses a **High-Contrast Dark Mode** with:
-- **Backdrop-filter (Blur)**: To create the "Frosted Glass" effect.
-- **CSS Variable Tokens**: For consistent primary (Neon Purple), success (Green), and danger (Red) colors.
-- **Custom Scrollbars & Transitions**: For a premium, app-like feel.
+Both the frontend (`src/services/intent.js`) and backend (`backend/intent.py`) tokenize the query, expand tokens through a synonym map, build a sparse count vector, and compute cosine similarity against per-intent prototype vectors built from canonical example phrases. A top-score threshold (0.18) and an ambiguity margin (0.05) decide between a confident classification and a clarification fallback.
 
-### 📈 Dynamic SVG Engine
-Instead of using external libraries (Chart.js), the dashboard utilizes a custom-built **SVG Rendering Logic** (`Charts.renderDynamicSVG`).
-- **Precision**: Calculates angles based on categorical percentages.
-- **Aesthetics**: Uses a high-contrast rainbow palette to ensure distinct category separation.
+## Financial analysis
 
----
+`computeSnapshot` derives a `FinancialSnapshot`:
 
-## 4. API Reference (Backend)
+- `monthlySpent`, `totalSpent`, `transactionCount`
+- `budgetAmount`, `budgetRemaining`, `budgetVariance`
+- `savingsRate` (if income is known), `discretionaryRatio`, `essentialRatio`
+- `recurringTotal`, `debtToIncome`
+- `categoryTotals` and month-over-month `categoryDeltas`
 
-| Endpoint | Method | Description |
-| :--- | :--- | :--- |
-| `/api/add-expense` | `POST` | Logs a new transaction and updates the budget. |
-| `/api/get-expenses` | `GET` | Retrieves the history of all transactions. |
-| `/api/set-budget` | `POST` | Updates the monthly/period budget limit. |
-| `/api/ai-decision` | `POST` | Sends a natural language query to the LangGraph brain. |
+Insights consume the snapshot and never invent figures.
 
----
+## Fallback behavior
 
-## 5. Advanced Financial Knowledge
-The agent is "Grandmaster Trained" on the following domains:
+When `classifyIntent` returns no intent above threshold, the system asks a concise clarification. When required data is missing (income, debt balance, price), the response sets `confidence ≤ 0.5` and prompts for the missing input.
 
-- **The FIRE Movement**: Calculation of the 4% rule and "25x Expenses" goal.
-- **Tax Optimization**: Concepts of Harvesting and 401(k) efficiency.
-- **Geo-Arbitrage**: Strategies for relocating income-to-expense ratios.
-- **Behavioral Psychology**: Techniques for managing FOMO and lifestyle creep.
-- **Generational Wealth**: Implementation of 529 plans and trust-based inheritance.
+## Tone enforcement
 
----
+The renderer applies a list of banned-phrase regexes (`grandmaster`, `dynasty`, `wealth architect`, etc.) and strips matches before display. The system prompt for the LLM is a fiduciary-planner brief; the deterministic engine never produces motivational copy.
 
-## 6. Deployment & Scaling
-- **Frontend**: Optimized for Vercel/Netlify.
-- **Backend/AI**: Recommended hosting on Render or Railway to support the Python/Node hybrid environment.
-- **Environment Management**: Utilizes `.env` for secure credential storage and `.gitignore` for security.
+## Memory
 
----
+Memory captures `monthlyIncome`, `savingsTarget`, `debtBalance`, and tag-based `priorities`. Updates are extracted from chat input via tight regexes and via the Profile panel. The store is intentionally minimal and never represents a relationship.
 
-## 🛡️ Fiduciary Disclaimer
-The Smart Finance Agent is designed to be a **Fiduciary Mentor**. It prioritizes user safety over speculative gains and is programmed to warn users about the risks of high-volatility assets.
+## Backend endpoints
 
-*Documentation Version: 1.0 (Grandmaster)*
+- `POST /api/intent` → `IntentResult`
+- `POST /api/finance` → `AssistantResponse`
+- `GET /api/health` → status
+
+## Limitations
+
+- Currency is rendered as INR; multi-currency support is not implemented.
+- The synonym list is hand-curated rather than embedding-derived; full semantic embeddings would require a model in the runtime.
+- The memory store is per-process and not persistent server-side; persistence lives in browser `localStorage`.

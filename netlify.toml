@@ -1,7 +1,15 @@
 [build]
-  publish = "."
+publish = "."
+command = ""
 
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+[[headers]]
+for = "/*"
+[headers.values]
+X-Content-Type-Options = "nosniff"
+Referrer-Policy = "no-referrer"
+Permissions-Policy = "geolocation=()"
+
+[[headers]]
+for = "/src/*.js"
+[headers.values]
+Content-Type = "text/javascript; charset=utf-8"

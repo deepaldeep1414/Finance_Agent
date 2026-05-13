@@ -1,80 +1,82 @@
-# 🤖 Smart Finance AI Agent: Grandmaster Edition
+# Finance Copilot
 
-A production-grade, agentic personal finance application built with a high-fidelity dashboard and a LangGraph-powered AI brain. This agent is trained to act as a **Fiduciary Grandmaster Advisor**, handling everything from daily expense tracking to multi-generational wealth engineering.
+A grounded, analytical personal-finance assistant. The frontend ships as a static SPA; the backend is an optional FastAPI service that adds LLM-grounded responses.
 
-## 🚀 Key Features
-- **Dynamic SVG Analytics**: High-contrast, real-time pie charts for spending breakdown.
-- **LangGraph Agentic Brain**: Multi-node reasoning with reflection and confidence scoring.
-- **High-Recall RAG**: Knowledge base containing expert financial principles.
-- **Budget Guardrails**: One-time 80% threshold audio alerts.
-- **Premium UI**: Dark-mode optimized, glassmorphic design with micro-animations.
+## Architecture
 
----
+```
+index.html            single-page entry
+style.css             single stylesheet
+src/
+  main.js             bootstrap
+  state.js            typed app state
+  types.js            JSDoc typedefs
+  services/
+    intent.js         semantic intent classifier (TF–IDF cosine)
+    analysis.js       deterministic financial metrics
+    insights.js       structured AssistantResponse generation
+    memory.js         conversational memory extraction
+    categorize.js     category + recurrence detection
+    render.js         renderer with banned-phrase sanitization
+    storage.js        localStorage layer
+    llm.js            optional backend client
+  ui/
+    sidebar.js
+    dashboard.js
+    transactions.js
+    budget.js
+    memory.js
+    chat.js
+    auth.js
+backend/
+  app.py              FastAPI app
+  schemas.py          pydantic AssistantResponse, FinancialSnapshot, IntentResult
+  intent.py           semantic classifier (mirror of frontend)
+  analysis.py         deterministic helpers
+  insights.py         structured response generation
+  llm.py              Groq client, JSON-structured output
+  memory.py           in-process MemoryStore
+  prompts.py          system prompt + output instruction
+  config.py           pydantic-settings
+```
 
-## 🧠 Master Catalog of Questions
-You can interact with the agent using natural language. Below are the optimized categories and questions it is trained to handle.
+## Behavior
 
-### 📊 1. Tracking & Operations (Intent: Action)
-- *"Spent ₹450 on Dominos"*
-- *"Bought groceries for ₹1200"*
-- *"How much have I spent in total?"*
-- *"How much on Food this month?"*
-- *"What was my total spending in April?"*
-- *"Can I afford a laptop for ₹80,000?"*
-- *"What is my current budget status?"*
-
-### 💡 2. Strategic Advisory (Intent: Education)
-- *"What is the 50/30/20 rule?"*
-- *"Give me some saving tips."*
-- *"How do I build an emergency fund?"*
-- *"What is the debt snowball method?"*
-- *"How much should I save for retirement?"*
-
-### 💰 3. Wealth Management (Intent: Strategy)
-- *"How can I achieve FIRE (Financial Independence)?"*
-- *"Should I invest in Index Funds?"*
-- *"How do I protect my money from inflation?"*
-- *"What are tax optimization strategies?"*
-- *"Give me advice on Cryptocurrency risk."*
-- *"How do I start a side hustle?"*
-
-### 🏛️ 4. Grandmaster Level (Intent: Architecture)
-- *"How do I prepare for a recession?"*
-- *"What is geo-arbitrage and how do I use it?"*
-- *"How do I engineer a 800+ credit score?"*
-- *"How do I build generational wealth?"*
-- *"What is my current Net Worth?"*
-- *"Explain estate planning and trusts."*
-
-### 🧠 5. Behavioral Finance (Intent: Coaching)
-- *"How do I handle market volatility?"*
-- *"Help me avoid FOMO (Fear Of Missing Out)."*
-- *"What is lifestyle creep and how do I stop it?"*
-
----
-
-## 🛠️ Technology Stack
-- **Frontend**: Vanilla HTML5, CSS3 (Glassmorphism), JavaScript (ES6+).
-- **Backend**: Node.js & Express (API Layer).
-- **AI Brain**: Python 3.10+, LangGraph, LangChain, Groq (Llama 3).
-- **Data**: LocalStorage (Persistence) & RAG (Knowledge Retrieval).
-
-## ⚙️ Setup & Installation
-1. **Backend**: 
-   ```bash
-   cd backend
-   npm install
-   node server.js
+1. Intent classification uses TF–IDF cosine similarity over canonical prototypes for each of the 14 supported intents.
+2. Financial metrics are computed before insights are generated: monthly spend, budget variance, savings rate, discretionary ratio, recurring total, category totals and deltas, debt-to-income.
+3. Every response is rendered from a strict `AssistantResponse` schema:
+   ```json
+   {
+     "intent": "spending_analysis",
+     "summary": "",
+     "key_insight": "",
+     "financial_impact": "",
+     "recommendation": "",
+     "risk_level": "low",
+     "confidence": 0.0,
+     "metrics_used": [],
+     "follow_up_question": ""
+   }
    ```
-2. **Frontend**:
-   Open `index.html` in a web browser (or serve via Live Server at port 8000).
-3. **Environment**:
-   Ensure `GROQ_API_KEY` is set in the `.env` file within the `agent_v2` directory.
+4. Ambiguous queries return a clarification with possible angles rather than a canned speech.
+5. The renderer strips any banned phrasing before display.
 
-## 🛡️ Fiduciary & Accuracy Standards
-Every response from the agent includes an **AI Accuracy Badge**:
-- **95%**: Deterministic calculations and logging.
-- **85%**: General advisory and rules.
-- **80%**: Complex engineering and niche strategy.
+## Run the frontend
 
-*Note: This agent is a training tool. For high-stakes financial decisions, always consult with a certified human professional.*
+```
+python3 -m http.server 8080
+# open http://localhost:8080
+```
+
+## Run the backend
+
+```
+pip install -r requirements.txt
+GROQ_API_KEY=...  uvicorn backend.app:app --port 8000 --reload
+```
+
+If `GROQ_API_KEY` is unset, the backend falls back to the deterministic insight engine.
+
+## Deployment
+
+Netlify publishes the repo root as a static SPA. The backend is independent and not required for the frontend to function.
