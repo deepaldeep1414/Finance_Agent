@@ -4,435 +4,1719 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Personal Finance AI Agent</title>
-    <link rel="stylesheet" href="style.css">
+    <title>SmartFinance AI</title>
     <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #080c14;
+            --surface: #0d1424;
+            --surface2: #111827;
+            --border: rgba(255, 255, 255, 0.07);
+            --border-bright: rgba(255, 255, 255, 0.14);
+            --lime: #c8f135;
+            --lime-dim: rgba(200, 241, 53, 0.12);
+            --lime-glow: 0 0 24px rgba(200, 241, 53, 0.25);
+            --cyan: #22d3ee;
+            --cyan-dim: rgba(34, 211, 238, 0.1);
+            --red: #f43f5e;
+            --red-dim: rgba(244, 63, 94, 0.12);
+            --amber: #fbbf24;
+            --text: #f1f5f9;
+            --text-muted: #64748b;
+            --text-dim: #94a3b8;
+            --radius: 16px;
+            --sidebar-w: 260px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ── NOISE OVERLAY ── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+
+        /* ── AMBIENT GLOWS ── */
+        .glow-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(120px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .glow-1 {
+            width: 500px;
+            height: 500px;
+            background: rgba(200, 241, 53, 0.04);
+            top: -100px;
+            left: 200px;
+        }
+
+        .glow-2 {
+            width: 400px;
+            height: 400px;
+            background: rgba(34, 211, 238, 0.04);
+            bottom: 0;
+            right: 0;
+        }
+
+        /* ── LAYOUT ── */
+        #app {
+            display: flex;
+            height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: var(--sidebar-w);
+            background: linear-gradient(180deg, rgba(13, 20, 36, 0.95) 0%, rgba(8, 12, 20, 0.95) 100%);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            flex-shrink: 0;
+            backdrop-filter: blur(20px);
+            position: relative;
+            z-index: 10;
+        }
+
+        .sidebar-brand {
+            padding: 28px 24px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 4px;
+        }
+
+        .brand-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: var(--lime);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #080c14;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .brand-name {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--text);
+            letter-spacing: -0.02em;
+        }
+
+        .brand-name span {
+            color: var(--lime);
+        }
+
+        .brand-tag {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-left: 50px;
+        }
+
+        .sidebar-nav {
+            padding: 16px 12px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+            border: 1px solid transparent;
+            user-select: none;
+        }
+
+        .nav-item i {
+            width: 18px;
+            text-align: center;
+            font-size: 0.95rem;
+        }
+
+        .nav-item:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .nav-item.active {
+            color: var(--lime);
+            background: var(--lime-dim);
+            border-color: rgba(200, 241, 53, 0.2);
+        }
+
+        .nav-item.active i {
+            color: var(--lime);
+        }
+
+        .nav-section-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 16px 14px 6px;
+            font-weight: 600;
+        }
+
+        .sidebar-bottom {
+            padding: 16px 12px;
+            border-top: 1px solid var(--border);
+        }
+
+        .user-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+        }
+
+        .user-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--lime), var(--cyan));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: #080c14;
+            flex-shrink: 0;
+        }
+
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .user-status {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        /* ── MAIN ── */
+        .main {
+            flex: 1;
+            overflow-y: auto;
+            background: var(--bg);
+            scroll-behavior: smooth;
+        }
+
+        .main::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .main::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .page {
+            display: none;
+            padding: 32px 36px;
+            max-width: 1100px;
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeUp 0.35s ease;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ── PAGE HEADER ── */
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-header h1 {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 2rem;
+            color: var(--text);
+            letter-spacing: -0.03em;
+            margin-bottom: 4px;
+        }
+
+        .page-header p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* ── CARDS ── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            transition: border-color 0.2s;
+        }
+
+        .card:hover {
+            border-color: var(--border-bright);
+        }
+
+        .card-title {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        /* ── STAT CARDS ── */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px 22px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .stat-card:hover {
+            border-color: var(--border-bright);
+            transform: translateY(-2px);
+        }
+
+        .stat-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-value {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.9rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+        }
+
+        .stat-value.lime {
+            color: var(--lime);
+        }
+
+        .stat-value.red {
+            color: var(--red);
+        }
+
+        .stat-value.cyan {
+            color: var(--cyan);
+        }
+
+        .stat-sub {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        .stat-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2.5rem;
+            opacity: 0.06;
+        }
+
+        /* ── BUDGET BAR ── */
+        .budget-bar-wrap {
+            margin-top: 12px;
+        }
+
+        .budget-bar-track {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+
+        .budget-bar-fill {
+            height: 100%;
+            border-radius: 99px;
+            background: var(--lime);
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .budget-bar-fill.warn {
+            background: var(--amber);
+        }
+
+        .budget-bar-fill.danger {
+            background: var(--red);
+        }
+
+        /* ── CHART AREA ── */
+        .chart-card {
+            margin-bottom: 24px;
+        }
+
+        #chart-parent {
+            height: 260px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: rgba(255, 255, 255, 0.01);
+            border-radius: 12px;
+            margin-top: 16px;
+        }
+
+        .chart-empty {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .chart-empty i {
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: 10px;
+            opacity: 0.3;
+        }
+
+        /* ── TRANSACTIONS ── */
+        .tx-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .tx-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+
+        .tx-item:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: var(--border-bright);
+        }
+
+        .tx-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .tx-desc {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .tx-name {
+            font-weight: 500;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tx-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .tx-amount {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--red);
+        }
+
+        .tx-delete {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            font-size: 0.8rem;
+        }
+
+        .tx-delete:hover {
+            color: var(--red);
+            background: var(--red-dim);
+        }
+
+        /* ── FORMS ── */
+        .form-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .form-grid.cols2 {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .form-grid.cols3 {
+            grid-template-columns: 2fr 1fr 1fr;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .form-group input,
+        .form-group select {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 11px 14px;
+            color: var(--text);
+            font-size: 0.9rem;
+            font-family: 'DM Sans', sans-serif;
+            outline: none;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        .form-group input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--lime);
+            background: rgba(200, 241, 53, 0.05);
+            box-shadow: 0 0 0 3px rgba(200, 241, 53, 0.08);
+        }
+
+        .form-group select option {
+            background: var(--surface2);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            border: none;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--lime);
+            color: #080c14;
+            box-shadow: 0 4px 16px rgba(200, 241, 53, 0.2);
+        }
+
+        .btn-primary:hover {
+            background: #d4f53f;
+            transform: translateY(-1px);
+            box-shadow: var(--lime-glow);
+        }
+
+        .btn-ghost {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-ghost:hover {
+            background: rgba(255, 255, 255, 0.09);
+            border-color: var(--border-bright);
+        }
+
+        .btn-full {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-cyan {
+            background: var(--cyan);
+            color: #080c14;
+        }
+
+        .btn-cyan:hover {
+            filter: brightness(1.1);
+            transform: translateY(-1px);
+        }
+
+        /* ── AI CHAT ── */
+        .chat-wrap {
+            display: flex;
+            flex-direction: column;
+            height: 500px;
+            border-radius: var(--radius);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .chat-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chat-header-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--lime), var(--cyan));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            color: #080c14;
+        }
+
+        .chat-header-title {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .chat-header-sub {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .online-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--lime);
+            margin-left: auto;
+            animation: pulse-dot 2s infinite;
+        }
+
+        @keyframes pulse-dot {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            scroll-behavior: smooth;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .msg {
+            display: flex;
+            gap: 10px;
+            max-width: 85%;
+        }
+
+        .msg.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .msg-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .ai .msg-avatar {
+            background: linear-gradient(135deg, var(--lime), var(--cyan));
+            color: #080c14;
+        }
+
+        .user .msg-avatar {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: #fff;
+        }
+
+        .msg-bubble {
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 0.87rem;
+            line-height: 1.55;
+            font-weight: 400;
+        }
+
+        .ai .msg-bubble {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-top-left-radius: 4px;
+            color: var(--text);
+        }
+
+        .user .msg-bubble {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: #fff;
+            border-top-right-radius: 4px;
+        }
+
+        .msg-bubble strong {
+            color: var(--lime);
+        }
+
+        .ai .msg-bubble strong {
+            color: var(--lime);
+        }
+
+        .user .msg-bubble strong {
+            color: #fff;
+        }
+
+        .confidence-tag {
+            display: inline-block;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+            border-top: 1px solid var(--border);
+            padding-top: 4px;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 4px 2px;
+        }
+
+        .typing-indicator span {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--lime);
+            animation: bounce 1.2s infinite ease-in-out;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0.6);
+                opacity: 0.4;
+            }
+
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .chat-input-area {
+            padding: 14px 16px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 14px;
+            color: var(--text);
+            font-size: 0.875rem;
+            font-family: 'DM Sans', sans-serif;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .chat-input-area input:focus {
+            border-color: var(--lime);
+            background: rgba(200, 241, 53, 0.04);
+        }
+
+        .chat-input-area input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .send-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--lime);
+            border: none;
+            color: #080c14;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .send-btn:hover {
+            filter: brightness(1.1);
+            transform: translateY(-1px);
+        }
+
+        /* ── INSIGHT CHIPS ── */
+        .insight-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .insight-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            border-left: 3px solid;
+        }
+
+        .insight-item.info {
+            background: var(--cyan-dim);
+            border-color: var(--cyan);
+            color: var(--text);
+        }
+
+        .insight-item.warn {
+            background: rgba(251, 191, 36, 0.08);
+            border-color: var(--amber);
+            color: var(--text);
+        }
+
+        .insight-item.danger {
+            background: var(--red-dim);
+            border-color: var(--red);
+            color: var(--text);
+        }
+
+        .insight-item.good {
+            background: var(--lime-dim);
+            border-color: var(--lime);
+            color: var(--text);
+        }
+
+        .insight-item i {
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        /* ── CATEGORY PILLS ── */
+        .cat-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .cat-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 99px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .cat-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+        }
+
+        /* ── TOAST ── */
+        #toast {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            z-index: 9999;
+            background: var(--surface2);
+            border: 1px solid var(--lime);
+            color: var(--text);
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), var(--lime-glow);
+            transform: translateY(80px);
+            opacity: 0;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            max-width: 320px;
+        }
+
+        #toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* ── GRID HELPERS ── */
+        .grid2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .mt16 {
+            margin-top: 16px;
+        }
+
+        .mt24 {
+            margin-top: 24px;
+        }
+
+        .mb24 {
+            margin-bottom: 24px;
+        }
+
+        /* ── SCROLLBAR ── */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 5px;
+        }
+
+        @media (max-width: 900px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .stats-row {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .form-grid.cols3 {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .page {
+                padding: 20px;
+            }
+        }
+    </style>
 </head>
 
-<body class="dark-theme">
-    <!-- Cinematic Elements -->
-    <div id="particles-container"></div>
+<body>
 
-    <div class="background-shapes">
-        <div class="shape shape-1"></div>
-        <div class="shape shape-2"></div>
-        <div class="shape shape-3"></div>
-        <div class="shape shape-4"></div>
-    </div>
+    <div class="glow-orb glow-1"></div>
+    <div class="glow-orb glow-2"></div>
 
-    <!-- LOGIN PAGE -->
-    <div id="login-view" class="view-container active">
-        <div class="login-box glass-card premium-border">
-            <div class="logo-center">
-                <div class="logo-icon-wrapper pulse-animation">
-                    <i class="fa-solid fa-robot"></i>
+    <div id="app">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-logo">
+                    <div class="brand-icon">₹</div>
+                    <div class="brand-name">Smart<span>Finance</span></div>
                 </div>
-                <h1>SmartFinance <span class="ai-badge">AI</span></h1>
-            </div>
-            <h2 class="mt-4" style="text-align: center; font-size: 1.5rem;">Welcome Back</h2>
-            <p style="text-align: center; opacity: 0.7; margin-bottom: 2rem;">Log in to access your financial agent.</p>
-
-            <form id="login-form">
-                <div class="form-group">
-                    <label>Username</label>
-                    <div class="input-with-icon">
-                        <i class="fa-solid fa-user"></i>
-                        <input type="text" id="login-username" placeholder="Enter your name" required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <div class="input-with-icon">
-                        <i class="fa-solid fa-lock"></i>
-                        <input type="password" id="login-password" placeholder="••••••••" required>
-                    </div>
-                </div>
-                <button type="submit" class="btn-primary w-100 btn-glow mt-3">
-                    <i class="fa-solid fa-right-to-bracket"></i> Login Securely
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- MAIN APP LAYOUT -->
-    <div id="app-view" class="view-container hidden layout-wrapper">
-
-        <!-- SIDEBAR NAVIGATION -->
-        <aside class="sidebar glass-card">
-            <div class="sidebar-header">
-                <div class="logo-icon-wrapper">
-                    <i class="fa-solid fa-robot"></i>
-                </div>
-                <h1 style="font-size: 1.2rem;">SmartFinance</h1>
-                <button id="sidebar-collapse-btn" class="sidebar-toggle-btn">
-                    <i class="fa-solid fa-chevron-left"></i>
-                </button>
+                <div class="brand-tag">Grandmaster Edition</div>
             </div>
 
             <nav class="sidebar-nav">
-                <button class="nav-btn active" data-target="dashboard">
-                    <i class="fa-solid fa-chart-pie"></i> Dashboard
-                </button>
-                <button class="nav-btn" data-target="transactions">
-                    <i class="fa-solid fa-list-check"></i> Transactions
-                </button>
-                <button class="nav-btn" data-target="budget">
-                    <i class="fa-solid fa-vault"></i> Budget
-                </button>
-
-                <button class="nav-btn" data-target="notifications">
-                    <i class="fa-solid fa-bell"></i> Notifications
-                </button>
-                <button class="nav-btn" data-target="ai">
-                    <i class="fa-solid fa-brain"></i> AI Agent
-                </button>
-                <button class="nav-btn" data-target="profile">
-                    <i class="fa-solid fa-user-circle"></i> Profile
-                </button>
+                <div class="nav-section-label">Main</div>
+                <div class="nav-item active" data-page="dashboard"><i class="fa-solid fa-chart-pie"></i> Dashboard</div>
+                <div class="nav-item" data-page="transactions"><i class="fa-solid fa-list-check"></i> Transactions</div>
+                <div class="nav-section-label">Finance</div>
+                <div class="nav-item" data-page="add-expense"><i class="fa-solid fa-plus-circle"></i> Add Expense</div>
+                <div class="nav-item" data-page="budget"><i class="fa-solid fa-vault"></i> Budget</div>
+                <div class="nav-section-label">AI</div>
+                <div class="nav-item" data-page="advisor"><i class="fa-solid fa-brain"></i> AI Advisor</div>
+                <div class="nav-item" data-page="insights"><i class="fa-solid fa-lightbulb"></i> Insights</div>
             </nav>
 
-            <div class="sidebar-footer">
-                <button id="theme-toggle" class="btn-icon w-100" style="border-radius: 12px; margin-bottom: 1rem;">
-                    <i class="fa-solid fa-sun"></i> <span>Toggle Theme</span>
-                </button>
-                <button id="logout-btn" class="nav-btn text-danger">
-                    <i class="fa-solid fa-right-from-bracket"></i> Logout
-                </button>
+            <div class="sidebar-bottom">
+                <div class="user-card">
+                    <div class="user-avatar" id="user-avatar-initials">U</div>
+                    <div class="user-info">
+                        <div class="user-name" id="sidebar-username">User</div>
+                        <div class="user-status"><i class="fa-solid fa-circle"
+                                style="color:var(--lime);font-size:7px"></i> Active</div>
+                    </div>
+                </div>
             </div>
         </aside>
 
-        <!-- MAIN CONTENT AREA -->
-        <main class="main-content">
-            <button id="sidebar-open-btn" class="sidebar-open-btn hidden">
-                <i class="fa-solid fa-bars"></i>
-            </button>
+        <!-- MAIN CONTENT -->
+        <main class="main">
 
-            <!-- PAGE: DASHBOARD -->
-            <div id="page-dashboard" class="page active">
-                <header class="page-header">
-                    <h2><i class="fa-solid fa-hand-wave"></i> Hello, <span id="user-greeting">User</span>!</h2>
-                    <p class="subtitle">Here's your financial overview.</p>
-                </header>
+            <!-- ═══════════════ DASHBOARD ═══════════════ -->
+            <div class="page active" id="page-dashboard">
+                <div class="page-header">
+                    <h1>Dashboard</h1>
+                    <p>Your financial overview at a glance</p>
+                </div>
 
-                <section class="cinematic-grid">
-                    <!-- Top Row: Analytics & Quick Stats -->
-                    <div class="glass-card col-span-8" style="padding: 1.5rem;">
-                        <h2 style="font-size: 1.2rem; margin-bottom: 1rem;">Financial summary <span
-                                style="font-size: 0.8rem; font-weight: normal; opacity: 0.7;">Track your
-                                activities</span></h2>
-                        <div id="chart-parent" style="height: 350px; width: 100%; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.02); border-radius: 16px; position: relative;">
-                            <!-- Dynamic SVG Chart Rendered Here -->
-                            <div style="text-align: center; opacity: 0.5;">
-                                <i class="fa-solid fa-chart-pie" style="font-size: 3rem; margin-bottom: 1rem;"></i>
-                                <div>Analyzing your finances...</div>
-                            </div>
-                        </div>
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Budget</div>
+                        <div class="stat-value lime" id="stat-budget">₹0</div>
+                        <div class="stat-sub" id="stat-period">Monthly</div>
+                        <i class="fa-solid fa-vault stat-icon"></i>
                     </div>
-
-                    <div class="col-span-4 dashboard-stats-column"
-                        style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; min-height: 500px;">
-                        <div class="premium-card" style="padding: 1.2rem; margin-bottom: 0;">
-                            <div class="stat-content">
-                                <h3>Total Budget <span id="budget-period-display"
-                                        style="font-size: 0.8rem; font-weight: normal; opacity: 0.7;">(Monthly)</span>
-                                </h3>
-                                <p id="total-budget-display" style="font-size: 2rem; color: #fff;">₹0</p>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Spent</div>
+                        <div class="stat-value" id="stat-spent">₹0</div>
+                        <div class="budget-bar-wrap">
+                            <div class="budget-bar-track">
+                                <div class="budget-bar-fill" id="budget-bar" style="width:0%"></div>
                             </div>
                         </div>
-                        <div class="premium-card budget-card" style="padding: 1.2rem; margin-bottom: 0;">
-                            <div class="stat-content">
-                                <h3>Total Spent</h3>
-                                <p id="total-spent-display" style="font-size: 2rem; color: var(--primary);">₹0</p>
-                            </div>
-                        </div>
-                        <div class="premium-card remaining-card" id="balance-card"
-                            style="padding: 1.2rem; margin-bottom: 0;">
-                            <div class="stat-content">
-                                <h3>Remaining Balance</h3>
-                                <p id="remaining-balance-display" style="font-size: 2rem;">₹0</p>
-                                <span id="balance-status-text" class="status-text" style="font-size: 0.85rem;">Good
-                                    Standing</span>
-                            </div>
-                        </div>
-
-                        <div class="glass-card" style="padding: 1.2rem; flex-grow: 1; border: 1px dashed var(--secondary);">
-                            <div class="stat-content">
-                                <h3 style="color: var(--secondary);"><i class="fa-solid fa-brain"></i> Memory Recall</h3>
-                                <div id="memory-stat-summary" style="margin-top: 0.5rem;">
-                                    <div style="font-size: 1.5rem; font-weight: 800;" id="memory-recall-percent">0%</div>
-                                    <div style="font-size: 0.8rem; opacity: 0.7;">Profile Completion</div>
-                                </div>
-                            </div>
-                        </div>
+                        <div class="stat-sub" id="stat-pct">0% of budget used</div>
+                        <i class="fa-solid fa-arrow-trend-up stat-icon"></i>
                     </div>
-
-                    <!-- Bottom Row: Accounts, Quick Add, Savings -->
-
-                    <div class="glass-card col-span-12" style="padding: 1.5rem;">
-                        <h2 style="font-size: 1.2rem; margin-bottom: 1rem;"><i
-                                class="fa-solid fa-bolt text-primary"></i> Quick Add Expense</h2>
-                        <form id="expense-form">
-                            <div class="form-row">
-                                <div class="form-group flex-2">
-                                    <label>Description</label>
-                                    <div class="input-with-icon">
-                                        <i class="fa-solid fa-tag"></i>
-                                        <input type="text" id="expense-name" placeholder="e.g. Starbucks" required>
-                                    </div>
-                                </div>
-                                <div class="form-group flex-1">
-                                    <label>Amount (₹)</label>
-                                    <div class="input-with-icon">
-                                        <i class="fa-solid fa-indian-rupee-sign"></i>
-                                        <input type="number" id="expense-amount" placeholder="0.00" min="0.01"
-                                            step="0.01" required>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-row mt-3">
-                                <div class="form-group flex-1">
-                                    <label>Category <span class="ai-hint">AI Auto-detects</span></label>
-                                    <div class="input-with-icon">
-                                        <i class="fa-solid fa-layer-group"></i>
-                                        <select id="expense-category">
-                                            <option value="">✨ Let AI Decide ✨</option>
-                                            <option value="Food">🍔 Food & Dining</option>
-                                            <option value="Travel">🚗 Travel</option>
-                                            <option value="Shopping">🛍️ Shopping</option>
-                                            <option value="Bills">🧾 Bills & Utilities</option>
-                                            <option value="Health">⚕️ Health</option>
-                                            <option value="Entertainment">🍿 Entertainment</option>
-                                            <option value="Other">📦 Other</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="form-group flex-1">
-                                    <label>Date</label>
-                                    <div class="input-with-icon">
-                                        <i class="fa-regular fa-calendar"></i>
-                                        <input type="date" id="expense-date" required>
-                                    </div>
-                                </div>
-                            </div>
-                            <button type="submit" class="btn-primary w-100 btn-glow mt-4">Add Transaction</button>
-                        </form>
+                    <div class="stat-card">
+                        <div class="stat-label">Remaining</div>
+                        <div class="stat-value cyan" id="stat-remaining">₹0</div>
+                        <div class="stat-sub" id="stat-status">Set a budget to begin</div>
+                        <i class="fa-solid fa-wallet stat-icon"></i>
                     </div>
-                </section>
-            </div>
+                </div>
 
-
-
-            <!-- PAGE: NOTIFICATIONS -->
-            <div id="page-notifications" class="page hidden">
-                <header class="page-header">
-                    <h2><i class="fa-solid fa-bell"></i> Notifications & Insights</h2>
-                    <p class="subtitle">AI-driven wallet updates and alerts.</p>
-                </header>
-
-                <div class="glass-card mt-4" style="padding: 1.5rem; max-width: 800px; margin: 1rem auto;">
-                    <div id="notifications-list" style="display: flex; flex-direction: column; gap: 1rem;">
-                        <!-- Dynamic notifications -->
-                        <div style="text-align: center; opacity: 0.5; padding: 2rem;">No new notifications.</div>
+                <div class="grid2">
+                    <div class="card chart-card">
+                        <div class="card-title">Spending Breakdown</div>
+                        <div id="chart-parent">
+                            <div class="chart-empty"><i class="fa-solid fa-chart-pie"></i>Add expenses to see chart
+                            </div>
+                        </div>
+                        <div class="cat-pills" id="cat-pills"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Recent Transactions</div>
+                        <div class="tx-list" id="recent-tx-list">
+                            <div style="color:var(--text-muted);font-size:0.875rem;text-align:center;padding:20px 0">No
+                                transactions yet</div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- PAGE: BUDGET -->
-            <div id="page-budget" class="page hidden">
-                <header class="page-header">
-                    <h2><i class="fa-solid fa-bullseye"></i> Financial Goal & Budget</h2>
-                    <p class="subtitle">Set your spending limits to let AI analyze your habits.</p>
-                </header>
-
-                <section class="glass-card mt-4" style="max-width: 600px; margin: 0 auto;">
-                    <div class="logo-center mb-4">
-                        <div class="logo-icon-wrapper" style="width: 80px; height: 80px; font-size: 3rem;">
-                            <i class="fa-solid fa-vault"></i>
-                        </div>
+            <!-- ═══════════════ TRANSACTIONS ═══════════════ -->
+            <div class="page" id="page-transactions">
+                <div class="page-header">
+                    <h1>Transactions</h1>
+                    <p>Full history of your expenses</p>
+                </div>
+                <div class="card">
+                    <div class="tx-list" id="full-tx-list">
+                        <div style="color:var(--text-muted);font-size:0.875rem;text-align:center;padding:30px 0">No
+                            transactions yet</div>
                     </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════ ADD EXPENSE ═══════════════ -->
+            <div class="page" id="page-add-expense">
+                <div class="page-header">
+                    <h1>Add Expense</h1>
+                    <p>Log a new transaction manually or use the AI chat</p>
+                </div>
+                <div class="card" style="max-width:580px">
+                    <form id="expense-form">
+                        <div class="form-grid mb24">
+                            <div class="form-group">
+                                <label>Description</label>
+                                <input type="text" id="exp-desc" placeholder="e.g. Domino's Pizza" required>
+                            </div>
+                        </div>
+                        <div class="form-grid cols3 mb24">
+                            <div class="form-group">
+                                <label>Amount (₹)</label>
+                                <input type="number" id="exp-amount" placeholder="0.00" step="0.01" min="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Category</label>
+                                <select id="exp-category">
+                                    <option value="">✨ Auto-detect</option>
+                                    <option value="Food">🍔 Food</option>
+                                    <option value="Travel">🚗 Travel</option>
+                                    <option value="Shopping">🛍 Shopping</option>
+                                    <option value="Bills">🧾 Bills</option>
+                                    <option value="Health">⚕️ Health</option>
+                                    <option value="Entertainment">🍿 Entertainment</option>
+                                    <option value="Other">📦 Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Date</label>
+                                <input type="date" id="exp-date" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-full"><i class="fa-solid fa-plus"></i> Add
+                            Transaction</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- ═══════════════ BUDGET ═══════════════ -->
+            <div class="page" id="page-budget">
+                <div class="page-header">
+                    <h1>Budget</h1>
+                    <p>Set your spending limit</p>
+                </div>
+                <div class="card" style="max-width:420px">
                     <form id="budget-form">
-                        <div class="form-group">
-                            <label>Budget Period</label>
-                            <div class="input-with-icon">
-                                <i class="fa-solid fa-calendar-days"></i>
-                                <select id="budget-period">
+                        <div class="form-grid mb24">
+                            <div class="form-group">
+                                <label>Budget Amount (₹)</label>
+                                <input type="number" id="bud-amount" placeholder="e.g. 50000" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Period</label>
+                                <select id="bud-period">
                                     <option value="Monthly">Monthly</option>
+                                    <option value="Weekly">Weekly</option>
                                     <option value="Yearly">Yearly</option>
                                 </select>
                             </div>
                         </div>
-                        <div class="form-group mt-4">
-                            <label>Budget Amount (₹)</label>
-                            <div class="input-with-icon large-input">
-                                <i class="fa-solid fa-indian-rupee-sign"></i>
-                                <input type="number" id="budget-input" placeholder="e.g. 50000" min="1" required>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn-primary w-100 btn-glow mt-4">
-                            <i class="fa-solid fa-check"></i> Save Budget
-                        </button>
+                        <button type="submit" class="btn btn-primary btn-full"><i class="fa-solid fa-check"></i> Save
+                            Budget</button>
                     </form>
-                </section>
-            </div>
-
-            <!-- PAGE: AI AGENT -->
-            <div id="page-ai" class="page hidden">
-                <header class="page-header">
-                    <h2><i class="fa-solid fa-brain"></i> AI Agent Hub</h2>
-                    <p class="subtitle">Automated insights, alerts, and conversational financial assistance.</p>
-                </header>
-
-                <div class="main-grid mt-4">
-                    <!-- AI Insights -->
-                    <section class="glass-card ai-insights-card neon-border left-col">
-                        <div class="ai-header">
-                            <div class="ai-avatar">
-                                <i class="fa-solid fa-robot" style="font-size: 1.5rem; color: white;"></i>
-                            </div>
-                            <h2>Proactive Analysis</h2>
-                        </div>
-                        <div id="ai-alerts-container" class="insights-container mt-3" style="max-height: 400px;">
-                            <div class="insight-item empty-state">Provide some expenses for me to analyze!</div>
-                        </div>
-
-                        <div class="memory-stats-box mt-4" style="background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 16px; border: 1px solid rgba(184, 84, 245, 0.2);">
-                            <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--secondary);"><i class="fa-solid fa-microchip"></i> Memory Statistics</h3>
-                            <div class="stats-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
-                                <div class="stat-mini-card">
-                                    <div style="font-size: 0.8rem; opacity: 0.7;">Context Hits</div>
-                                    <div style="font-size: 1.2rem; font-weight: 700;" id="memory-hits">0</div>
-                                </div>
-                                <div class="stat-mini-card">
-                                    <div style="font-size: 0.8rem; opacity: 0.7;">Known Patterns</div>
-                                    <div style="font-size: 1.2rem; font-weight: 700;" id="memory-patterns">0</div>
-                                </div>
-                                <div class="stat-mini-card">
-                                    <div style="font-size: 0.8rem; opacity: 0.7;">Base Chunks</div>
-                                    <div style="font-size: 1.2rem; font-weight: 700;">1,240</div>
-                                </div>
-                                <div class="stat-mini-card">
-                                    <div style="font-size: 0.8rem; opacity: 0.7;">Learning Rate</div>
-                                    <div style="font-size: 1.2rem; font-weight: 700;">High</div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- AI Chat Assistant -->
-                    <section class="glass-card ai-chat-section right-col">
-                        <h2><i class="fa-solid fa-message text-warning"></i> Ask Agent</h2>
-
-                        <div class="chat-window" id="chat-window" style="height: 350px;">
-                            <div class="chat-message ai-message">
-                                <div class="message-avatar"><i class="fa-solid fa-robot"></i></div>
-                                <div class="message-bubble">Hey! You can talk to me naturally. Try:<br>• <em>"spent 450
-                                        on Dominos"</em> → I'll log it instantly ✅<br>• <em>"How much on Food this
-                                        month?"</em><br>• <em>"Can I afford a ₹3000 jacket?"</em></div>
-                            </div>
-                        </div>
-
-                        <form id="chat-form" class="chat-input-area mt-3">
-                            <div class="input-with-icon advanced-input w-100">
-                                <input type="text" id="chat-input"
-                                    placeholder="e.g. spent 200 on Uber, or ask a question..." required
-                                    autocomplete="off">
-                                <button type="submit" class="btn-primary"
-                                    style="padding: 0.8rem 1.2rem; border-radius: 8px;">
-                                    <i class="fa-solid fa-paper-plane"></i>
-                                </button>
-                            </div>
-                        </form>
-                    </section>
+                    <div class="card mt24" style="background:rgba(200,241,53,0.05);border-color:rgba(200,241,53,0.2)">
+                        <div class="card-title" style="color:var(--lime)">Current Budget</div>
+                        <div style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:var(--lime)"
+                            id="bud-display">₹0</div>
+                        <div style="color:var(--text-muted);font-size:0.82rem;margin-top:4px" id="bud-period-display">
+                            Not set</div>
+                    </div>
                 </div>
             </div>
 
-            <!-- PAGE: TRANSACTIONS -->
-            <div id="page-transactions" class="page hidden">
-                <header class="page-header"
-                    style="display: flex; justify-content: space-between; align-items: flex-start;">
-                    <div>
-                        <h2><i class="fa-solid fa-list-check"></i> Transaction History</h2>
-                        <p class="subtitle">View all your expenses and generate reports.</p>
-                    </div>
-                    <button id="export-pdf-btn" class="btn-primary btn-glow">
-                        <i class="fa-solid fa-file-pdf"></i> Export to PDF
-                    </button>
-                </header>
+            <!-- ═══════════════ AI ADVISOR ═══════════════ -->
+            <div class="page" id="page-advisor">
+                <div class="page-header">
+                    <h1>AI Advisor</h1>
+                    <p>Ask anything — expense logging, affordability checks, financial strategy</p>
+                </div>
 
-                <section class="glass-card mt-4">
-                    <div id="pdf-content">
-                        <div class="pdf-header hidden" id="pdf-header">
-                            <h1>Financial Report</h1>
-                            <p id="pdf-date"></p>
+                <div class="grid2" style="margin-bottom:20px">
+                    <div class="card">
+                        <div class="card-title">Quick Affordability Check</div>
+                        <div style="display:flex;gap:10px;margin-top:12px">
+                            <div class="form-group" style="flex:1">
+                                <input type="number" id="afford-price" placeholder="Item price (₹)" step="0.01">
+                            </div>
+                            <button class="btn btn-primary" id="afford-btn" style="align-self:flex-end"><i
+                                    class="fa-solid fa-robot"></i> Ask AI</button>
                         </div>
-                        <div class="transactions-list full-list" id="full-transactions-list" style="max-height: none;">
-                            <!-- Full Transactions injected here -->
+                        <div id="afford-result" style="margin-top:12px;display:none"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Smart Analysis</div>
+                        <p style="font-size:0.85rem;color:var(--text-muted);margin:12px 0">Get a full AI-powered
+                            breakdown of your spending habits.</p>
+                        <button class="btn btn-cyan btn-full" id="analyze-btn"><i
+                                class="fa-solid fa-magnifying-glass-chart"></i> Analyze My Spending</button>
+                        <div id="analysis-result" style="margin-top:12px;display:none"></div>
+                    </div>
+                </div>
+
+                <div class="chat-wrap">
+                    <div class="chat-header">
+                        <div class="chat-header-icon"><i class="fa-solid fa-robot"></i></div>
+                        <div>
+                            <div class="chat-header-title">Grandmaster AI Agent</div>
+                            <div class="chat-header-sub">Fiduciary · 7-Phase Reasoning · RAG-Enhanced</div>
+                        </div>
+                        <div class="online-dot"></div>
+                    </div>
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="msg ai">
+                            <div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>
+                            <div class="msg-bubble">
+                                <strong>Grandmaster AI activated.</strong> I operate under a fiduciary standard — your
+                                best interest only.<br><br>
+                                Try:<br>
+                                • <em>"spent 450 on Dominos"</em> → logs instantly ✅<br>
+                                • <em>"Can I afford a ₹3000 jacket?"</em><br>
+                                • <em>"How do I achieve FIRE?"</em><br>
+                                • <em>"What is my budget status?"</em>
+                            </div>
                         </div>
                     </div>
-                </section>
+                    <div class="chat-input-area">
+                        <input type="text" id="chat-input" placeholder="Ask anything or log an expense…"
+                            autocomplete="off">
+                        <button class="send-btn" id="send-btn"><i class="fa-solid fa-paper-plane"></i></button>
+                    </div>
+                </div>
             </div>
 
-            <!-- PAGE: PROFILE -->
-            <div id="page-profile" class="page hidden">
-                <header class="page-header">
-                    <h2><i class="fa-solid fa-user-circle"></i> User Profile</h2>
-                    <p class="subtitle">Manage your account details.</p>
-                </header>
-
-                <section class="glass-card mt-4" style="max-width: 600px; margin: 0 auto; text-align: center;">
-                    <div class="profile-avatar mb-4"
-                        style="width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; font-size: 4rem; color: white; margin: 0 auto; box-shadow: var(--glow-primary);">
-                        <i class="fa-solid fa-user"></i>
+            <!-- ═══════════════ INSIGHTS ═══════════════ -->
+            <div class="page" id="page-insights">
+                <div class="page-header">
+                    <h1>Insights</h1>
+                    <p>AI-driven analysis of your financial patterns</p>
+                </div>
+                <div class="card">
+                    <div class="card-title">AI Observations</div>
+                    <div class="insight-list" id="insight-list">
+                        <div class="insight-item info"><i class="fa-solid fa-info-circle"></i> Add some expenses to
+                            generate personalized insights.</div>
                     </div>
-                    <h2 id="profile-name" style="justify-content: center; font-size: 2rem;">User</h2>
-                    <p class="subtitle">Active Member</p>
-
-                    <div class="profile-details mt-4"
-                        style="text-align: left; background: rgba(0,0,0,0.1); padding: 1.5rem; border-radius: 12px;">
-                        <div
-                            style="margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem;">
-                            <strong>Data Status:</strong> <span style="float:right; color: var(--success);">Synced
-                                Locally</span>
-                        </div>
-                        <div
-                            style="margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem;">
-                            <strong>Total Transactions:</strong> <span id="profile-tx-count"
-                                style="float:right;">0</span>
-                        </div>
-                        <div>
-                            <strong>Account Created:</strong> <span id="profile-join-date"
-                                style="float:right;">Today</span>
-                        </div>
-
-                    </div>
-
-                    <div class="agent-memory-box mt-4"
-                        style="text-align: left; background: rgba(79, 70, 229, 0.1); border: 1px solid var(--primary); padding: 1.5rem; border-radius: 12px; position: relative;">
-                        <span class="ai-badge" style="position: absolute; top: -10px; right: 20px;">AI Brain</span>
-                        <h3 style="font-size: 1.1rem; margin-bottom: 1rem;"><i class="fa-solid fa-brain"></i> Agent
-                            Financial Profile</h3>
-                        <div id="ai-user-profile" style="font-size: 0.9rem; line-height: 1.6;">
-                            <em>The Agent is currently gathering data...</em>
-                        </div>
-                    </div>
-
-                    <button id="profile-logout-btn" class="btn-primary w-100 mt-4"
-                        style="background: linear-gradient(135deg, var(--danger), #be123c); box-shadow: 0 0 20px rgba(239,68,68,0.4);">
-                        <i class="fa-solid fa-power-off"></i> Sign Out
-                    </button>
-                </section>
+                </div>
             </div>
 
         </main>
     </div>
 
-    <script src="script.js"></script>
+    <div id="toast"></div>
+
+    <script>
+        // ══════════════════════════════════════════════
+        //  STATE
+        // ══════════════════════════════════════════════
+        const API = 'http://localhost:5000/api';
+
+        const State = {
+            expenses: [],
+            budget: { total: 0, period: 'Monthly' },
+            budgetAlertFired: false,
+        };
+
+        const CAT_COLORS = {
+            Food: '#c8f135', Travel: '#22d3ee', Shopping: '#f472b6',
+            Bills: '#f43f5e', Health: '#34d399', Entertainment: '#a78bfa', Other: '#94a3b8'
+        };
+        const CAT_ICONS = {
+            Food: 'fa-utensils', Travel: 'fa-car', Shopping: 'fa-bag-shopping',
+            Bills: 'fa-file-invoice', Health: 'fa-heart-pulse', Entertainment: 'fa-film', Other: 'fa-box'
+        };
+
+        // ══════════════════════════════════════════════
+        //  NAVIGATION
+        // ══════════════════════════════════════════════
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                item.classList.add('active');
+                const target = item.dataset.page;
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.getElementById('page-' + target).classList.add('active');
+                if (target === 'insights') renderInsights();
+                if (target === 'transactions') renderFullTx();
+            });
+        });
+
+        // ══════════════════════════════════════════════
+        //  AUTO-DETECT CATEGORY
+        // ══════════════════════════════════════════════
+        const KW = {
+            Food: ['food', 'restaurant', 'dinner', 'lunch', 'breakfast', 'cafe', 'coffee', 'starbucks', 'dominos', 'pizza',
+                'burger', 'mcd', 'kfc', 'zomato', 'swiggy', 'groceries', 'supermarket', 'bigbasket', 'blinkit', 'eat', 'snack'],
+            Travel: ['uber', 'ola', 'taxi', 'cab', 'bus', 'train', 'flight', 'airport', 'hotel', 'travel', 'trip', 'petrol', 'fuel'],
+            Shopping: ['shopping', 'mall', 'amazon', 'flipkart', 'myntra', 'ajio', 'clothes', 'shoes', 'electronics', 'phone', 'laptop'],
+            Bills: ['bill', 'electricity', 'water', 'internet', 'wifi', 'mobile', 'recharge', 'rent', 'emi', 'insurance', 'tax'],
+            Health: ['hospital', 'doctor', 'medicine', 'pharmacy', 'gym', 'yoga', 'clinic', 'health', 'fitness'],
+            Entertainment: ['movie', 'cinema', 'netflix', 'prime', 'hotstar', 'spotify', 'concert', 'game', 'pub', 'party']
+        };
+        function autoCategory(desc) {
+            const d = desc.toLowerCase();
+            for (const [cat, words] of Object.entries(KW)) if (words.some(w => d.includes(w))) return cat;
+            return 'Other';
+        }
+
+        // ══════════════════════════════════════════════
+        //  NATURAL LANGUAGE PARSER
+        // ══════════════════════════════════════════════
+        function parseNL(input) {
+            const patterns = [
+                /(?:spent|paid)\s+(?:rs\.?|₹)?\s*(\d+(?:\.\d{1,2})?)\s+(?:on|for|at)\s+(.+)/i,
+                /(?:rs\.?|₹)\s*(\d+(?:\.\d{1,2})?)\s+(?:on|for|at)\s+(.+)/i,
+                /(.+)\s+(?:cost|costs|costed)\s+(?:rs\.?|₹)?\s*(\d+(?:\.\d{1,2})?)/i,
+                /(?:rs\.?|₹)?\s*(\d+(?:\.\d{1,2})?)\s+(?:on|for)\s+(.+)/i,
+            ];
+            for (const p of patterns) {
+                const m = input.match(p);
+                if (m) {
+                    const isCostPattern = p.toString().includes('cost');
+                    const amount = parseFloat(isCostPattern ? m[2] : m[1]);
+                    const desc = (isCostPattern ? m[1] : m[2]).trim();
+                    if (amount > 0 && desc.length > 0)
+                        return { type: 'expense', amount, description: desc, category: autoCategory(desc), date: new Date().toISOString().split('T')[0] };
+                }
+            }
+            return null;
+        }
+
+        // ══════════════════════════════════════════════
+        //  FETCH HELPERS
+        // ══════════════════════════════════════════════
+        async function apiFetch(path, opts = {}) {
+            const r = await fetch(API + path, { headers: { 'Content-Type': 'application/json' }, ...opts });
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            return r.json();
+        }
+
+        // ══════════════════════════════════════════════
+        //  DASHBOARD RENDER
+        // ══════════════════════════════════════════════
+        function renderDashboard() {
+            const total = State.expenses.reduce((s, e) => s + Number(e.amount), 0);
+            const budget = Number(State.budget.total) || 0;
+            const remain = budget - total;
+            const pct = budget > 0 ? Math.min(100, total / budget * 100) : 0;
+
+            document.getElementById('stat-budget').textContent = fmt(budget);
+            document.getElementById('stat-period').textContent = State.budget.period || 'Monthly';
+            document.getElementById('stat-spent').textContent = fmt(total);
+            document.getElementById('stat-remaining').textContent = fmt(remain);
+            document.getElementById('stat-pct').textContent = pct.toFixed(1) + '% of budget used';
+            document.getElementById('bud-display').textContent = fmt(budget);
+            document.getElementById('bud-period-display').textContent = (State.budget.period || 'Monthly') + ' budget';
+
+            const bar = document.getElementById('budget-bar');
+            bar.style.width = pct + '%';
+            bar.className = 'budget-bar-fill' + (pct >= 100 ? ' danger' : pct >= 80 ? ' warn' : '');
+
+            const statusEl = document.getElementById('stat-status');
+            if (budget === 0) { statusEl.textContent = 'Set a budget to begin'; }
+            else if (remain < 0) { statusEl.textContent = '⚠️ Over budget!'; statusEl.style.color = 'var(--red)'; }
+            else if (pct >= 80) { statusEl.textContent = '⚠️ Running low'; statusEl.style.color = 'var(--amber)'; }
+            else { statusEl.textContent = '✅ On track'; statusEl.style.color = 'var(--lime)'; }
+
+            // 80% alert
+            if (budget > 0 && pct >= 80 && !State.budgetAlertFired) {
+                State.budgetAlertFired = true;
+                showToast('⚠️ You have used 80% of your budget!');
+            }
+
+            renderChart();
+            renderRecentTx();
+        }
+
+        function fmt(n) { return '₹' + Number(n).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 }); }
+
+        // ══════════════════════════════════════════════
+        //  PIE CHART (custom SVG)
+        // ══════════════════════════════════════════════
+        function renderChart() {
+            const parent = document.getElementById('chart-parent');
+            const pills = document.getElementById('cat-pills');
+
+            const totals = {};
+            State.expenses.forEach(e => {
+                totals[e.category] = (totals[e.category] || 0) + Number(e.amount);
+            });
+            const grand = Object.values(totals).reduce((s, v) => s + v, 0);
+
+            if (grand === 0) {
+                parent.innerHTML = '<div class="chart-empty"><i class="fa-solid fa-chart-pie"></i>Add expenses to see chart</div>';
+                pills.innerHTML = ''; return;
+            }
+
+            const R = 70, cx = 90, cy = 90, circ = 2 * Math.PI * R;
+            let offset = 0;
+            let svg = `<svg viewBox="0 0 180 180" style="width:180px;height:180px;transform:rotate(-90deg)">`;
+            const entries = Object.entries(totals);
+            entries.forEach(([cat, amt]) => {
+                const pct = amt / grand, dash = pct * circ;
+                const col = CAT_COLORS[cat] || '#94a3b8';
+                svg += `<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${col}" stroke-width="22"
+      stroke-dasharray="${dash} ${circ}" stroke-dashoffset="${-offset}" style="transition:all 0.6s ease"/>`;
+                offset += dash;
+            });
+            svg += `</svg>`;
+
+            parent.innerHTML = svg;
+            pills.innerHTML = entries.map(([cat, amt]) => `
+    <div class="cat-pill">
+      <div class="cat-dot" style="background:${CAT_COLORS[cat] || '#94a3b8'}"></div>
+      ${cat} <span style="color:var(--text-muted)">${(amt / grand * 100).toFixed(0)}%</span>
+    </div>`).join('');
+        }
+
+        // ══════════════════════════════════════════════
+        //  TRANSACTION LIST
+        // ══════════════════════════════════════════════
+        function txHTML(e, showDelete = true) {
+            const col = CAT_COLORS[e.category] || '#94a3b8';
+            const icon = CAT_ICONS[e.category] || 'fa-box';
+            const del = showDelete ? `<button class="tx-delete" onclick="deleteTx(${e.id})"><i class="fa-solid fa-trash"></i></button>` : '';
+            return `<div class="tx-item">
+    <div class="tx-icon" style="background:${col}18;color:${col}"><i class="fa-solid ${icon}"></i></div>
+    <div class="tx-desc">
+      <div class="tx-name">${e.title || e.description || 'Expense'}</div>
+      <div class="tx-meta">${e.category} · ${e.date}</div>
+    </div>
+    <div class="tx-amount">-${fmt(e.amount)}</div>
+    ${del}
+  </div>`;
+        }
+
+        function renderRecentTx() {
+            const el = document.getElementById('recent-tx-list');
+            const sorted = [...State.expenses].reverse().slice(0, 5);
+            el.innerHTML = sorted.length ? sorted.map(e => txHTML(e))
+                .join('') : '<div style="color:var(--text-muted);font-size:0.875rem;text-align:center;padding:20px 0">No transactions yet</div>';
+        }
+
+        function renderFullTx() {
+            const el = document.getElementById('full-tx-list');
+            const sorted = [...State.expenses].reverse();
+            el.innerHTML = sorted.length ? sorted.map(e => txHTML(e))
+                .join('') : '<div style="color:var(--text-muted);font-size:0.875rem;text-align:center;padding:30px 0">No transactions yet</div>';
+        }
+
+        window.deleteTx = function (id) {
+            State.expenses = State.expenses.filter(e => e.id !== id);
+            renderDashboard();
+            renderFullTx();
+            showToast('Transaction deleted');
+        };
+
+        // ══════════════════════════════════════════════
+        //  INSIGHTS
+        // ══════════════════════════════════════════════
+        function renderInsights() {
+            const el = document.getElementById('insight-list');
+            const exps = State.expenses;
+            if (!exps.length) {
+                el.innerHTML = '<div class="insight-item info"><i class="fa-solid fa-info-circle"></i>Add expenses to generate insights.</div>';
+                return;
+            }
+            const total = exps.reduce((s, e) => s + Number(e.amount), 0);
+            const budget = Number(State.budget.total) || 0;
+            const pct = budget > 0 ? (total / budget * 100) : 0;
+            const cats = {};
+            exps.forEach(e => { cats[e.category] = (cats[e.category] || 0) + Number(e.amount); });
+            const topCat = Object.entries(cats).sort((a, b) => b[1] - a[1])[0];
+            const avg = total / exps.length;
+
+            const items = [];
+            if (pct >= 100) items.push({ cls: 'danger', icon: 'fa-triangle-exclamation', text: `You are <strong>over budget</strong> by ${fmt(total - budget)}.` });
+            else if (pct >= 80) items.push({ cls: 'warn', icon: 'fa-circle-exclamation', text: `Budget ${pct.toFixed(0)}% used. Only ${fmt(budget - total)} remaining.` });
+            else if (budget > 0) items.push({ cls: 'good', icon: 'fa-circle-check', text: `Budget health is good. ${fmt(budget - total)} remaining (${(100 - pct).toFixed(0)}%).` });
+            if (topCat) items.push({ cls: 'info', icon: 'fa-chart-pie', text: `Highest spend: <strong>${topCat[0]}</strong> at ${fmt(topCat[1])} (${(topCat[1] / total * 100).toFixed(0)}% of total).` });
+            items.push({ cls: 'info', icon: 'fa-receipt', text: `<strong>${exps.length}</strong> transactions logged. Average transaction: <strong>${fmt(avg)}</strong>.` });
+
+            // 50/30/20 hint
+            if (budget > 0) {
+                const needs = budget * 0.5, wants = budget * 0.3, savings = budget * 0.2;
+                items.push({ cls: 'info', icon: 'fa-lightbulb', text: `50/30/20 Rule for your budget: Needs ${fmt(needs)} · Wants ${fmt(wants)} · Savings ${fmt(savings)}.` });
+            }
+            el.innerHTML = items.map(i => `<div class="insight-item ${i.cls}"><i class="fa-solid ${i.icon}"></i><div>${i.text}</div></div>`).join('');
+        }
+
+        // ══════════════════════════════════════════════
+        //  FORMS
+        // ══════════════════════════════════════════════
+        document.getElementById('expense-form').addEventListener('submit', async e => {
+            e.preventDefault();
+            const desc = document.getElementById('exp-desc').value.trim();
+            const amount = parseFloat(document.getElementById('exp-amount').value);
+            const cat = document.getElementById('exp-category').value || autoCategory(desc);
+            const date = document.getElementById('exp-date').value;
+            if (!desc || !amount || !date) return;
+            await addExpense(desc, amount, cat, date);
+            e.target.reset();
+            document.getElementById('exp-date').value = today();
+            showToast('Expense added: ' + desc);
+            document.querySelector('[data-page="dashboard"]').click();
+        });
+
+        document.getElementById('budget-form').addEventListener('submit', async e => {
+            e.preventDefault();
+            const amount = parseFloat(document.getElementById('bud-amount').value);
+            const period = document.getElementById('bud-period').value;
+            if (!amount) return;
+            try {
+                await apiFetch('/set-budget', { method: 'POST', body: JSON.stringify({ total: amount, period }) });
+            } catch (_) { }
+            State.budget = { total: amount, period };
+            State.budgetAlertFired = false;
+            renderDashboard();
+            showToast('Budget set to ' + fmt(amount));
+        });
+
+        async function addExpense(title, amount, category, date) {
+            try {
+                const r = await apiFetch('/add-expense', { method: 'POST', body: JSON.stringify({ title, amount, category, date }) });
+                State.expenses.push(r.expense);
+            } catch (_) {
+                State.expenses.push({ id: Date.now(), title, amount, category, date });
+            }
+            renderDashboard();
+        }
+
+        // ══════════════════════════════════════════════
+        //  AFFORDABILITY
+        // ══════════════════════════════════════════════
+        document.getElementById('afford-btn').addEventListener('click', async () => {
+            const price = parseFloat(document.getElementById('afford-price').value);
+            const res = document.getElementById('afford-result');
+            if (!price || price <= 0) { res.style.display = 'none'; return; }
+            res.style.display = 'block';
+            res.innerHTML = '<div class="insight-item info"><i class="fa-solid fa-spinner fa-spin"></i> Checking…</div>';
+            try {
+                const r = await apiFetch('/ai-decision', { method: 'POST', body: JSON.stringify({ query: 'can I afford this', price }) });
+                const cls = r.decision === 'YES' ? 'good' : 'danger';
+                const icon = r.decision === 'YES' ? 'fa-circle-check' : 'fa-circle-xmark';
+                res.innerHTML = `<div class="insight-item ${cls}"><i class="fa-solid ${icon}"></i><div><strong>${r.decision}</strong> — ${r.reason}</div></div>`;
+            } catch (err) {
+                res.innerHTML = '<div class="insight-item danger"><i class="fa-solid fa-triangle-exclamation"></i>Backend error. Is the server running?</div>';
+            }
+        });
+
+        // ══════════════════════════════════════════════
+        //  SMART ANALYSIS
+        // ══════════════════════════════════════════════
+        document.getElementById('analyze-btn').addEventListener('click', async () => {
+            const res = document.getElementById('analysis-result');
+            res.style.display = 'block';
+            res.innerHTML = '<div class="insight-item info"><i class="fa-solid fa-spinner fa-spin"></i> Analyzing…</div>';
+            try {
+                const r = await apiFetch('/analyze', { method: 'POST' });
+                const insights = r.insights || [];
+                res.innerHTML = `
+      <div class="insight-item good" style="margin-bottom:8px">
+        <i class="fa-solid fa-chart-bar"></i><div><strong>Summary</strong><br>${r.analysis || 'No data'}</div>
+      </div>
+      ${insights.map(i => `<div class="insight-item info" style="margin-bottom:6px"><i class="fa-solid fa-chevron-right"></i><div>${i}</div></div>`).join('')}`;
+            } catch (err) {
+                res.innerHTML = '<div class="insight-item danger"><i class="fa-solid fa-triangle-exclamation"></i>Backend error. Is the server running?</div>';
+            }
+        });
+
+        // ══════════════════════════════════════════════
+        //  AI CHAT
+        // ══════════════════════════════════════════════
+        function appendMsg(text, isUser = false) {
+            const win = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.className = 'msg ' + (isUser ? 'user' : 'ai');
+            div.innerHTML = `
+    <div class="msg-avatar"><i class="fa-solid ${isUser ? 'fa-user' : 'fa-robot'}"></i></div>
+    <div class="msg-bubble">${text}</div>`;
+            win.appendChild(div);
+            win.scrollTop = win.scrollHeight;
+            return div;
+        }
+
+        function appendTyping() {
+            const win = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.className = 'msg ai'; div.id = 'typing-msg';
+            div.innerHTML = `<div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>
+    <div class="msg-bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div>`;
+            win.appendChild(div); win.scrollTop = win.scrollHeight;
+        }
+
+        async function handleChat(input) {
+            if (!input.trim()) return;
+            appendMsg(input, true);
+            document.getElementById('chat-input').value = '';
+            appendTyping();
+            await new Promise(r => setTimeout(r, 500));
+            document.getElementById('typing-msg')?.remove();
+
+            // Try NL parse first (instant, no API)
+            const parsed = parseNL(input);
+            if (parsed) {
+                await addExpense(parsed.description, parsed.amount, parsed.category, parsed.date);
+                appendMsg(`✅ Logged: <strong>${parsed.description}</strong> — <strong>${fmt(parsed.amount)}</strong> under <em>${parsed.category}</em><br><div class="confidence-tag">⚡ Accuracy: 99% (deterministic)</div>`);
+                return;
+            }
+
+            // Query patterns
+            const q = input.toLowerCase();
+            if (q.includes('budget status') || q.includes('how much left') || q.includes('remaining')) {
+                const t = State.expenses.reduce((s, e) => s + Number(e.amount), 0);
+                const b = Number(State.budget.total) || 0;
+                appendMsg(`Budget: <strong>${fmt(b)}</strong> · Spent: <strong>${fmt(t)}</strong> · Remaining: <strong>${fmt(b - t)}</strong>`);
+                return;
+            }
+            if (q.includes('how much') && (q.includes('spent') || q.includes('total'))) {
+                const t = State.expenses.reduce((s, e) => s + Number(e.amount), 0);
+                appendMsg(`Total spent so far: <strong>${fmt(t)}</strong> across ${State.expenses.length} transactions.`);
+                return;
+            }
+
+            // Send to backend AI
+            try {
+                const r = await apiFetch('/ai-decision', { method: 'POST', body: JSON.stringify({ query: input, price: 0 }) });
+                const conf = r.confidence ? `<div class="confidence-tag">🎯 Confidence: ${(r.confidence * 100).toFixed(0)}%</div>` : '';
+                appendMsg((r.reason || r.analysis || 'No response') + conf);
+            } catch (err) {
+                appendMsg('⚠️ Could not reach the backend. Make sure the server is running on port 5000.');
+            }
+        }
+
+        document.getElementById('send-btn').addEventListener('click', () => {
+            handleChat(document.getElementById('chat-input').value);
+        });
+        document.getElementById('chat-input').addEventListener('keydown', e => {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleChat(document.getElementById('chat-input').value); }
+        });
+
+        // ══════════════════════════════════════════════
+        //  TOAST
+        // ══════════════════════════════════════════════
+        let toastTimer;
+        function showToast(msg) {
+            const el = document.getElementById('toast');
+            el.textContent = msg; el.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+        }
+
+        // ══════════════════════════════════════════════
+        //  UTILS
+        // ══════════════════════════════════════════════
+        function today() { return new Date().toISOString().split('T')[0]; }
+
+        // ══════════════════════════════════════════════
+        //  INIT
+        // ══════════════════════════════════════════════
+        async function init() {
+            document.getElementById('exp-date').value = today();
+            // Load existing expenses from backend
+            try {
+                const data = await apiFetch('/get-expenses');
+                if (Array.isArray(data)) State.expenses = data;
+            } catch (_) { }
+            renderDashboard();
+        }
+
+        init();
+    </script>
 </body>
 
 </html>
